@@ -1,6 +1,8 @@
 import http from "k6/http"
 import {sleep} from "k6"
 import { SharedArray } from 'k6/data';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
+import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js'
 
 const queries = new SharedArray('queries', function () {
     return JSON.parse(open('./queries.json'));
@@ -24,3 +26,11 @@ export default function(){
     console.log(query.url)
     sleep(1)
 }
+export function handleSummary(data) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `summary_${timestamp}.html`;
+    return {
+      [filename]: htmlReport(data),
+      stdout: textSummary(data, { indent: ' ', enableColors: true }),
+    };
+  }
